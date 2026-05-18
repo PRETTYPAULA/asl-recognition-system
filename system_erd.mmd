@@ -1,0 +1,57 @@
+erDiagram
+    DATASET_IMAGES ||--o{ LANDMARKS : "extracts"
+    LANDMARKS ||--|| ML_MODELS : "trains"
+    ML_MODELS ||--o{ DETECTIONS : "predicts"
+    DETECTIONS ||--|| DATABASE : "logs_to"
+    
+    DATASET_IMAGES {
+        string letter_folder "A-Z"
+        int image_id
+        binary image_data
+    }
+    LANDMARKS {
+        float x_21
+        float y_21
+        float z_21
+        string label "A-Z"
+    }
+    ML_MODELS {
+        string landmark_model "landmark_asl_model.keras"
+        string cnn_model "asl_model.h5"
+        int num_classes "26"
+    }
+    DETECTIONS {
+        string predicted_letter
+        float confidence
+        timestamp detection_time
+    }
+    DATABASE {
+        int id PK
+        string predicted_letter
+        float confidence
+        string timestamp
+    }
+    
+    %% High-level System Flow
+    subgraph "Data Pipeline"
+        DATASET_IMAGES --> generate_landmarks.py
+        generate_landmarks.py --> LANDMARKS
+    end
+    subgraph "Training"
+        LANDMARKS --> train_landmark_model.py
+        train_landmark_model.py --> ML_MODELS
+    end
+    subgraph "Runtime App"
+        ML_MODELS --> DetectionEngine
+        CameraService --> Webcam_Frames
+        Webcam_Frames --> MediaPipe_Hands
+        MediaPipe_Hands --> DETECTIONS
+        DETECTIONS --> log_detection
+        log_detection --> DATABASE
+    end
+    subgraph "UI"
+        DetectionEngine --> detection.html
+        detection.html --> detection.js
+        learning.html --> learning.js
+        dashboard.html
+    end

@@ -1,0 +1,9 @@
+flask
+opencv-python
+mediapipe
+tensorflow
+keras
+numpy
+scikit-learn
+protobuf>=6.31.1,<8
+
